@@ -6,6 +6,7 @@ import Confetti from "react-confetti"
 export default function App() {
     const [dice, setDice] = React.useState(() => getAllNewDice())
     const [gameWin, setGameWin] = React.useState(false) 
+    const [movesNumber, setMovesNumber] = React.useState(0)
 
     React.useEffect(() =>
         {
@@ -39,10 +40,11 @@ export default function App() {
         return diceArray;
     }
 
-    function rollDice() {
+    function handleButtonClick() {
         if (gameWin) {
             setGameWin(false)
             setDice(getAllNewDice())
+            setMovesNumber(0)
         }
         else {
             setDice(prevDice => (
@@ -50,6 +52,7 @@ export default function App() {
                     die.isHeld ? die : getOneNewDie()
                 ))
             ))
+            setMovesNumber(prevMovesNumber => ++prevMovesNumber)
         }
     }
 
@@ -74,14 +77,28 @@ export default function App() {
         <main>
             {gameWin && <Confetti />}
             <h1 className="title">Tenzies</h1>
+
             <p className="description">
                 Roll until all dice are the same. Click each die to freeze
                 it at its current value between rolls.
             </p>
+
             <div className="dice-container">
                 {dieElements}
             </div>
-            <button className="main-button" onClick={rollDice}>{gameWin ? "Reset game" : "Roll"}</button>
+
+            <button className="main-button" onClick={handleButtonClick}>{gameWin ? "Reset game" : "Roll"}</button>
+
+            <div className="stats">
+                <div className="moves">
+                    <span className="stats--title">Moves: </span>
+                    <span className="stats--value">{movesNumber}</span>
+                </div>
+                <div className="timer">
+                    <span className="stats--title">Timer: </span>
+                    <span className="stats--value">00:00,0</span>
+                </div>
+            </div>
         </main>
     )
 }
