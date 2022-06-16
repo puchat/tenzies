@@ -128,4 +128,5 @@ main > .description {
 .stats .stats--value {
     font-weight: 700;
     font-size: 20px;
+    font-family: monospace;
 }

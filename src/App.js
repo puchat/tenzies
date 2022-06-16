@@ -3,23 +3,73 @@ import Die from "./Die"
 import {nanoid} from "nanoid"
 import Confetti from "react-confetti"
 
+const fanfareSound = new Audio('/sounds/fanfare.mp3');
+
 export default function App() {
     const [dice, setDice] = React.useState(() => getAllNewDice())
     const [gameWin, setGameWin] = React.useState(false) 
     const [movesNumber, setMovesNumber] = React.useState(0)
+    const [gameInterval, setGameInterval] = React.useState(null)
+    const [miliseconds, setMiliseconds] = React.useState(0)
 
-    React.useEffect(() =>
-        {
-            const allHeld = dice.every(die => die.isHeld)
-            const compareValue = dice[0].value
-            const allSameValues = dice.every(die => die.value === compareValue)
-
-            if (allHeld && allSameValues) {
-                setGameWin(true)
-            }
-
-        }
+    React.useEffect(() => checkIfWon()
     , [dice])
+
+    function startTimer() {
+        const msInterval = 100;
+        const myInterval = setInterval(() => setMiliseconds(prevMiliseconds => prevMiliseconds + msInterval), msInterval)
+        setGameInterval(myInterval)
+    }
+
+    function stopTimer() {
+        clearInterval(gameInterval)
+    }
+
+    function resetTimer() {
+        setGameInterval(null)
+        setMiliseconds(0)
+    }
+
+    function padTo2Digits(num) {
+        return num.toString().padStart(2, '0');
+    }
+
+    function convertMsToTime(milliseconds) {
+        let deciseconds = Math.floor(milliseconds / 100)
+        let seconds = Math.floor(milliseconds / 1000)
+        let minutes = Math.floor(seconds / 60)
+        let hours = Math.floor(minutes / 60)
+      
+        deciseconds = deciseconds % 10
+        seconds = seconds % 60;
+        minutes = minutes % 60;
+      
+        return `${padTo2Digits(minutes)}:${padTo2Digits(seconds)},${deciseconds}`;
+    }
+
+    function setGameWon() {
+        setGameWin(true)
+        stopTimer()
+        fanfareSound.play();
+    }
+
+    function checkIfWon() {
+        const allHeld = dice.every(die => die.isHeld)
+        const compareValue = dice[0].value
+        const allSameValues = dice.every(die => die.value === compareValue)
+
+        // game won
+        if (allHeld && allSameValues) {
+            setGameWon()
+        }
+    }
+
+    function resetGame() {
+        setGameWin(false)
+        setDice(getAllNewDice())
+        setMovesNumber(0)
+        resetTimer()
+    }
     
     function getOneNewDie() {
         let randomValue = Math.ceil(Math.random() * 6)
@@ -42,9 +92,7 @@ export default function App() {
 
     function handleButtonClick() {
         if (gameWin) {
-            setGameWin(false)
-            setDice(getAllNewDice())
-            setMovesNumber(0)
+            resetGame()
         }
         else {
             setDice(prevDice => (
@@ -53,16 +101,25 @@ export default function App() {
                 ))
             ))
             setMovesNumber(prevMovesNumber => ++prevMovesNumber)
+
+            if (!miliseconds) {
+                startTimer()
+            } 
         }
     }
 
     function toggleHeld(id) {
-        if (!gameWin)
+        if (!gameWin) {
             setDice(prevDice => (
                 prevDice.map(die => (
                         die.id === id ? {...die, isHeld: !die.isHeld} : die
                 ))
             ))
+
+            if (!miliseconds) {
+                startTimer()
+            } 
+        }
     }
 
     const dieElements = dice.map(die => (
@@ -95,8 +152,8 @@ export default function App() {
                     <span className="stats--value">{movesNumber}</span>
                 </div>
                 <div className="timer">
-                    <span className="stats--title">Timer: </span>
-                    <span className="stats--value">00:00,0</span>
+                    <span className="stats--title">Time: </span>
+                    <span className="stats--value">{convertMsToTime(miliseconds)}</span>
                 </div>
             </div>
         </main>
