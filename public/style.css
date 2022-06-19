@@ -128,5 +128,8 @@ main > .description {
 .stats .stats--value {
     font-weight: 700;
     font-size: 20px;
+}
+
+.timer {
     font-family: monospace;
 }
