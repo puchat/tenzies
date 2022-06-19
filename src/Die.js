@@ -4,7 +4,7 @@ export default function Die(props) {
 
     const dots = [];
     for (let i = 1; i <= props.value; i++) {
-        dots.push(<div className={`die-dot d${i}`}></div>)
+        dots.push(<div className={`die-dot d${i}`} key={i}></div>)
     }
 
     const styles = {

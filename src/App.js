@@ -1,56 +1,28 @@
 import React from "react"
 import Die from "./Die"
+import Timer from "./Timer"
 import {nanoid} from "nanoid"
 import Confetti from "react-confetti"
 
-const fanfareSound = new Audio('/sounds/fanfare.mp3');
+const fanfareSound = new Audio('/sounds/fanfare.mp3')
+const diceSound = new Audio('/sounds/throw_dice.mp3')
+const dieClickSound = new Audio('/sounds/die_click.mp3')
+const dieUnclickSound = new Audio('/sounds/die_unclick.mp3')
 
 export default function App() {
     const [dice, setDice] = React.useState(() => getAllNewDice())
     const [gameWin, setGameWin] = React.useState(false) 
     const [movesNumber, setMovesNumber] = React.useState(0)
-    const [gameInterval, setGameInterval] = React.useState(null)
-    const [miliseconds, setMiliseconds] = React.useState(0)
+    const [timerStarted, setTimerStarted] = React.useState(false)
+    const [timerCommand, setTimerCommand] = React.useState("stop")
 
     React.useEffect(() => checkIfWon()
     , [dice])
 
-    function startTimer() {
-        const msInterval = 100;
-        const myInterval = setInterval(() => setMiliseconds(prevMiliseconds => prevMiliseconds + msInterval), msInterval)
-        setGameInterval(myInterval)
-    }
-
-    function stopTimer() {
-        clearInterval(gameInterval)
-    }
-
-    function resetTimer() {
-        setGameInterval(null)
-        setMiliseconds(0)
-    }
-
-    function padTo2Digits(num) {
-        return num.toString().padStart(2, '0');
-    }
-
-    function convertMsToTime(milliseconds) {
-        let deciseconds = Math.floor(milliseconds / 100)
-        let seconds = Math.floor(milliseconds / 1000)
-        let minutes = Math.floor(seconds / 60)
-        let hours = Math.floor(minutes / 60)
-      
-        deciseconds = deciseconds % 10
-        seconds = seconds % 60;
-        minutes = minutes % 60;
-      
-        return `${padTo2Digits(minutes)}:${padTo2Digits(seconds)},${deciseconds}`;
-    }
-
     function setGameWon() {
         setGameWin(true)
-        stopTimer()
-        fanfareSound.play();
+        setTimerCommand("stop")
+        fanfareSound.play()
     }
 
     function checkIfWon() {
@@ -68,7 +40,7 @@ export default function App() {
         setGameWin(false)
         setDice(getAllNewDice())
         setMovesNumber(0)
-        resetTimer()
+        setTimerCommand("reset")
     }
     
     function getOneNewDie() {
@@ -87,7 +59,7 @@ export default function App() {
         for (let i = 0; i < 10; i++) {
             diceArray.push(getOneNewDie())
         }
-        return diceArray;
+        return diceArray
     }
 
     function handleButtonClick() {
@@ -95,6 +67,7 @@ export default function App() {
             resetGame()
         }
         else {
+            diceSound.play()
             setDice(prevDice => (
                 prevDice.map(die => (
                     die.isHeld ? die : getOneNewDie()
@@ -102,8 +75,8 @@ export default function App() {
             ))
             setMovesNumber(prevMovesNumber => ++prevMovesNumber)
 
-            if (!miliseconds) {
-                startTimer()
+            if (!timerStarted) {
+                setTimerCommand("start")
             } 
         }
     }
@@ -111,19 +84,21 @@ export default function App() {
     function toggleHeld(id) {
         if (!gameWin) {
             setDice(prevDice => (
-                prevDice.map(die => (
-                        die.id === id ? {...die, isHeld: !die.isHeld} : die
-                ))
+                prevDice.map(die => {
+                        die.id === id && die.isHeld ? dieUnclickSound.play() : dieClickSound.play()
+                        return die.id === id ? {...die, isHeld: !die.isHeld} : die
+                })
             ))
 
-            if (!miliseconds) {
-                startTimer()
+            if (!timerStarted) {
+                setTimerCommand("start")
             } 
         }
     }
 
     const dieElements = dice.map(die => (
         <Die 
+            key={die.id}
             value={die.value}
             isHeld={die.isHeld}
             toggleHeld={() => toggleHeld(die.id)}
@@ -153,7 +128,9 @@ export default function App() {
                 </div>
                 <div className="timer">
                     <span className="stats--title">Time: </span>
-                    <span className="stats--value">{convertMsToTime(miliseconds)}</span>
+                    <span className="stats--value">
+                        <Timer command={timerCommand} getStarted={setTimerStarted} />
+                    </span>
                 </div>
             </div>
         </main>
