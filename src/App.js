@@ -13,7 +13,6 @@ export default function App() {
     const [dice, setDice] = React.useState(() => getAllNewDice())
     const [gameWin, setGameWin] = React.useState(false) 
     const [movesNumber, setMovesNumber] = React.useState(0)
-    const [timerStarted, setTimerStarted] = React.useState(false)
     const [timerCommand, setTimerCommand] = React.useState("stop")
 
     React.useEffect(() => checkIfWon()
@@ -74,10 +73,7 @@ export default function App() {
                 ))
             ))
             setMovesNumber(prevMovesNumber => ++prevMovesNumber)
-
-            if (!timerStarted) {
-                setTimerCommand("start")
-            } 
+            setTimerCommand("start")
         }
     }
 
@@ -89,10 +85,7 @@ export default function App() {
                         return die.id === id ? {...die, isHeld: !die.isHeld} : die
                 })
             ))
-
-            if (!timerStarted) {
-                setTimerCommand("start")
-            } 
+            setTimerCommand("start")
         }
     }
 
@@ -129,7 +122,7 @@ export default function App() {
                 <div className="timer">
                     <span className="stats--title">Time: </span>
                     <span className="stats--value">
-                        <Timer command={timerCommand} getStarted={setTimerStarted} />
+                        <Timer command={timerCommand} />
                     </span>
                 </div>
             </div>
