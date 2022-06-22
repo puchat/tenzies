@@ -7,18 +7,19 @@ export default function Timer(props) {
     const [miliseconds, setMiliseconds] = React.useState(0)
 
     React.useEffect(() => {
-        if (props.command === "start" && !miliseconds) start()
-        else if (props.command === "stop") stop()
+        if (props.command === "start")      start()
+        else if (props.command === "stop")  stop()
         else if (props.command === "reset") reset()
     }, [props.command])
 
     function start() {
-        setMyInterval(
-            setInterval(
-                () => (setMiliseconds(prevMiliseconds => prevMiliseconds + msInterval)), 
-                msInterval
+        if (!miliseconds)
+            setMyInterval(
+                setInterval(
+                    () => (setMiliseconds(prevMiliseconds => prevMiliseconds + msInterval)), 
+                    msInterval
+                )
             )
-        )
     }
 
     function stop() {
@@ -49,8 +50,8 @@ export default function Timer(props) {
     }
 
     return (
-        <div className="timer">
+        <span className="timer">
             {getTimeString()}
-        </div>
+        </span>
     )
 }
