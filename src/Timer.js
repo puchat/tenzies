@@ -7,9 +7,17 @@ export default function Timer(props) {
     const [miliseconds, setMiliseconds] = React.useState(0)
 
     React.useEffect(() => {
-        if (props.command === "start")      start()
-        else if (props.command === "stop")  stop()
-        else if (props.command === "reset") reset()
+        switch (props.command) {
+            case "start":
+                start();
+                break;
+            case "stop":
+                stop();
+                break;
+            case "reset":
+                reset();
+                break;
+        }
     }, [props.command])
 
     function start() {
