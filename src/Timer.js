@@ -17,8 +17,15 @@ export default function Timer(props) {
             case "reset":
                 reset();
                 break;
+            default:
+                break;
         }
+
     }, [props.command])
+
+    React.useEffect(() => {
+        props.getMiliseconds(miliseconds)
+    })
 
     function start() {
         if (!miliseconds)

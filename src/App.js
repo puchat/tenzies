@@ -14,6 +14,7 @@ export default function App() {
     const [gameWin, setGameWin] = React.useState(false) 
     const [movesNumber, setMovesNumber] = React.useState(0)
     const [timerCommand, setTimerCommand] = React.useState("stop")
+    const [miliseconds, setMiliseconds] = React.useState(0);
 
     React.useEffect(() => checkIfWon()
     , [dice])
@@ -22,6 +23,11 @@ export default function App() {
         setGameWin(true)
         setTimerCommand("stop")
         fanfareSound.play()
+
+        if (localStorage.getItem("bestTime") === null || parseInt(localStorage.getItem("bestTime")) > miliseconds) {
+            localStorage.setItem("bestTime", miliseconds.toString())
+            console.log("Brawo! Pobiłeś rekord czasu! Obecny rekord: " + localStorage.getItem("bestTime"))
+        }
     }
 
     function checkIfWon() {
@@ -122,7 +128,7 @@ export default function App() {
                 <div className="timer">
                     <span className="stats--title">Time: </span>
                     <span className="stats--value">
-                        <Timer command={timerCommand} />
+                        <Timer command={timerCommand} getMiliseconds={(ms) => setMiliseconds(ms)} />
                     </span>
                 </div>
             </div>
