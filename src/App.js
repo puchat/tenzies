@@ -14,22 +14,21 @@ export default function App() {
     const [gameWin, setGameWin] = React.useState(false) 
     const [movesNumber, setMovesNumber] = React.useState(0)
     const [timerCommand, setTimerCommand] = React.useState("stop")
-    const [miliseconds, setMiliseconds] = React.useState(0);
+    const [miliseconds, setMiliseconds] = React.useState(0)
+    const [isBestTime, setIsBestTime] = React.useState(false)
 
     React.useEffect(() => checkIfWon()
     , [dice])
 
-    function setGameWon() {
-        setGameWin(true)
-        setTimerCommand("stop")
-        fanfareSound.play()
-
-        if (localStorage.getItem("bestTime") === null || parseInt(localStorage.getItem("bestTime")) > miliseconds) {
-            localStorage.setItem("bestTime", miliseconds.toString())
-            console.log("Brawo! Pobiłeś rekord czasu! Obecny rekord: " + localStorage.getItem("bestTime"))
+    React.useEffect(() => {
+        if (miliseconds) {  // miliseconds będą dodanie dopiero wtedy, gdy wykona się komenda stop() w Timerze, bo gra będzie wygrana
+            if (localStorage.getItem("bestTime") === null || parseInt(localStorage.getItem("bestTime")) > miliseconds) {
+                localStorage.setItem("bestTime", miliseconds.toString())
+                setIsBestTime(true)
+            }
         }
-    }
-
+    }, [miliseconds])
+    
     function checkIfWon() {
         const allHeld = dice.every(die => die.isHeld)
         const compareValue = dice[0].value
@@ -37,7 +36,9 @@ export default function App() {
 
         // game won
         if (allHeld && allSameValues) {
-            setGameWon()
+            setGameWin(true)
+            setTimerCommand("stop")
+            fanfareSound.play()
         }
     }
 
@@ -46,6 +47,7 @@ export default function App() {
         setDice(getAllNewDice())
         setMovesNumber(0)
         setTimerCommand("reset")
+        setIsBestTime(false)
     }
     
     function getOneNewDie() {
@@ -125,6 +127,7 @@ export default function App() {
                     <span className="stats--title">Moves: </span>
                     <span className="stats--value">{movesNumber}</span>
                 </div>
+                <div>{isBestTime && "Best time! :)"}</div>
                 <div className="timer">
                     <span className="stats--title">Time: </span>
                     <span className="stats--value">
